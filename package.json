@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "concurrently -k -n COMPILER,NODEMON -c gray,blue \"tsc -w\" \"nodemon -w dist dist/index.js\"",
-    "start": "NODE_ENV=production node dist/index.js",
+    "dev": "concurrently -k -n COMPILER,NODEMON -c gray,blue \"tsc -w\" \"nodemon  --inspect=9227 -w dist dist/index.js\"",
+    "client": "concurrently -k -n COMPILER,NODEMON -c gray,blue \"tsc -w\" \"nodemon --inspect=9225 -w dist dist/client.js \"",
+    "start": "NODE_ENV=production node --inspect=9227 dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,7 +28,9 @@
     "typescript": "^3.9.6"
   },
   "dependencies": {
+    "@grpc/proto-loader": "^0.5.5",
     "express": "^4.17.1",
-    "grpc": "^1.24.3"
+    "grpc": "^1.24.3",
+    "ts-node": "^8.10.2"
   }
 }
