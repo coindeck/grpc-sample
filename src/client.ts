@@ -1,5 +1,12 @@
-var PROTO_PATH = __dirname + '/../protos/helloworld.proto';
+//var PROTO_PATH = __dirname + '/../protos/helloworld.proto';
+import {GreeterClient} from "./protos/helloworld_grpc_pb";
+import {HelloReply, HelloRequest} from "./protos/helloworld_pb";
+
 var grpc = require('grpc');
+
+
+/*
+
 var protoLoader = require('@grpc/proto-loader');
 
 var packageDefinition = protoLoader.loadSync(
@@ -13,19 +20,32 @@ var packageDefinition = protoLoader.loadSync(
     });
 
 var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+*/
+async function main() {
 
-function main() {
-    var client = new hello_proto.Greeter('localhost:50051',
+
+    var client = new GreeterClient('localhost:50051',
         grpc.credentials.createInsecure());
     var user = 'world';
 
 
-    console.log(new Date().getTime()+"."+new Date().getMilliseconds());
-    client.sayHello({name: user}, function(err: any, response: any) {
-        console.log(new Date().getTime()+"."+new Date().getMilliseconds());
-        console.log('Greeting deine mutter:', response.message);
 
-    });
+
+    const greeterRequest = new HelloRequest();
+    greeterRequest.setName("Mein Name ist thoren");
+
+    for (let i=0; i<5; i++) {
+        await new Promise((resolve, reject) =>  {
+            console.log(new Date().getTime()+"."+new Date().getMilliseconds());
+            client.sayHello(greeterRequest, function(err: any, response: HelloReply) {
+                console.log(new Date().getTime()+"."+new Date().getMilliseconds());
+                console.log('Antwort vom Server:', response.getMessage());
+
+                resolve(true);
+            });
+        })
+
+    }
 }
 
 main();

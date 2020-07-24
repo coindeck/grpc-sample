@@ -1,7 +1,8 @@
 import express from 'express';
-
-const grpc = require('grpc');
-const protoLoader = require('@grpc/proto-loader');
+import {GreeterService, IGreeterServer, IGreeterService, IGreeterService_ISayHello} from "./protos/helloworld_grpc_pb";
+import {HelloReply, HelloRequest, default as helloworld_pb} from "./protos/helloworld_pb";
+import * as grpc from "grpc";
+import {ServerUnaryCall} from "grpc";
 
 const port = 5000;
 const app = express();
@@ -10,24 +11,20 @@ app.get('/', (_req, res) => {
     res.end('Hello asdasd!');
 });
 
-var PROTO_PATH = __dirname + '/../protos/helloworld.proto';
-
-var packageDefinition = protoLoader.loadSync(
-    PROTO_PATH,
-    {keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true
-    });
-var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
-
 /**
  * Implements the SayHello RPC method.
  */
-function sayHello(call: any, callback: any) {
+class Greeter implements IGreeterServer {
 
-    callback(null, {message: 'Hello ' + call.request.name});
+    public sayHello(call: ServerUnaryCall<HelloRequest>, cb: any) {
+        return new Promise((resolve, reject) => {
+
+            const msgReply = new HelloReply();
+            msgReply.setMessage("Hello "+call.request.getName());
+            cb(null, msgReply);
+
+        });
+    }
 
 }
 
@@ -36,7 +33,8 @@ app.listen(port, (err: Error) => {
     console.log(`Ready on port ${port}`);
 
     var server = new grpc.Server();
-    server.addService(hello_proto.Greeter.service, {sayHello: sayHello});
+
+    server.addService(GreeterService, new Greeter());
     server.bind('0.0.0.0:50051', grpc.ServerCredentials.createInsecure());
     server.start();
 
